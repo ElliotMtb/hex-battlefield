@@ -1,4 +1,6 @@
 import Intersection from "./Intersection";
+import RadialSweepVertex from "./RadialSweepHex";
+import RadialSweepHex from "./RadialSweepHex";
 
 class IntersectionBuilder {
 
@@ -8,7 +10,7 @@ class IntersectionBuilder {
         this.kineticLayer = kineticLayer;
     }
 
-    radialSweep(centerPoint) {
+    radialSweep(centerPoint, sweepStepper) {
 
         // Get range of 0 to 6
         // ES6 ... 'spread' operator
@@ -17,77 +19,52 @@ class IntersectionBuilder {
         // Forward radial vertex-index sweep
         this.sweep(
             fwdIndices,
-            centerPoint
+            centerPoint,
+            sweepStepper
         );
 
         // Reverse radial vertex-index sweep
         this.sweep(
             fwdIndices.reverse(),
-            centerPoint
+            centerPoint,
+            sweepStepper
         );
     }
 
-    getHexVertexCoords(centerX, centerY, radialIndex) {
+    sweep(indicesSeq, centerPoint, sweepStepper) {
 
-        // -60 degree offset (negative is for counter-clockwise direction)
-        var angleIncrement = -2 * Math.PI / 6;
-        
-        // -30 degree offset (negative is for counter-clockwise direction)
-        var angleOffset = -2 * Math.PI / 12;
-
-        var angleToVertex = radialIndex * angleIncrement - angleOffset;
-
-        var xyPair = this.getXyatArcEnd(centerX, centerY, this.hexFactory.hexRadius, angleToVertex);
-        
-        return xyPair;
-    }
-
-    getXyatArcEnd = function(c1,c2,radius,angle) {
-        
-        return [c1+Math.cos(angle)*radius,c2+Math.sin(angle)*radius];
-    };
-
-    sweep(indicesSeq, centerPoint) {
-
-        let lastIntersectionInSweep;        
+        let previous;
 
         indicesSeq.map((_, radialIndex) => {
 
-            let vertexCoords = this.getHexVertexCoords(centerPoint.x, centerPoint.y, radialIndex);
+            let sweepCoords = sweepStepper.getNextCoords(centerPoint.x, centerPoint.y, radialIndex);
 
-            let existing = this.spacialData.getIntersectionByXy(vertexCoords[0], vertexCoords[1]);
+            let existing = sweepStepper.lookupExistingPoint(sweepCoords[0], sweepCoords[1]);
             let current;
             // Collision
             if (existing) {
                 current = existing;
                 console.log("Collision!");
+                sweepStepper.onCollision(existing, centerPoint);
             }
             // No Collision
             else {
 
                 console.log("No Collision!");
-                // Add new Intersection
-                let vertex = this.hexFactory.getNewVertex(vertexCoords[0], vertexCoords[1]);
-
-                this.kineticLayer.add(vertex);
-                let newInter =  this.spacialData.addIntersection(vertex);
+                let newInter = sweepStepper.onNoCollision(sweepCoords[0], sweepCoords[1]);
                 
                 current = newInter;
             }
 
-            // Add neighbor etc.
-            current.addNeighborIntersection(current.id);
+            sweepStepper.onEveryStep(centerPoint, current, previous);
 
-            if (lastIntersectionInSweep) {
-                current.addNeighborIntersection(lastIntersectionInSweep.id);
-            }
-
-            current.addNeighborCenterPoint(centerPoint)
-            lastIntersectionInSweep = current;
+            previous = current;
         });
     }
 
-
+    addNewIntersection(x,y) {
+        
+    }
 }
 
 export default IntersectionBuilder;

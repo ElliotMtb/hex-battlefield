@@ -1,3 +1,5 @@
+import RadialSweepVertex from "./RadialSweepVertex";
+import RadialSweepHex from "./RadialSweepHex";
 
 class BoardBuilder {
 
@@ -35,7 +37,11 @@ class BoardBuilder {
 
                 let lastCenterPoint = this.spacialData.addCenterPoint(hex);
 
-                this.intersectionBuilder.radialSweep(lastCenterPoint);
+                let sweepStepper = new RadialSweepVertex(this.hexFactory, this.spacialData, kineticLayer);
+                this.intersectionBuilder.radialSweep(lastCenterPoint, sweepStepper);
+
+                let otherStepper = new RadialSweepHex(this.hexFactory, this.spacialData, kineticLayer);
+                this.intersectionBuilder.radialSweep(lastCenterPoint, otherStepper);
 
             });
       });

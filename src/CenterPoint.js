@@ -13,6 +13,18 @@ class CenterPoint {
 
     get x() { return this.hex.attrs.x };
     get y() { return this.hex.attrs.y };
+
+    addNeighborCenterPoint(centerPointId) {
+
+        if (typeof(centerPointId) !== 'undefined' && centerPointId !== null) {
+
+            let isAlreadyIn = this.adjCenters.some(x => centerPointId === x);
+
+            if (isAlreadyIn === false) {
+                this.adjCenters.push(centerPointId);
+            }
+        }
+    }
 }
 
 export default CenterPoint;

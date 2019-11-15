@@ -16,9 +16,9 @@ class Intersection {
 
     addNeighborIntersection(intersectionId) {
 
-        if (intersectionId) {
+        if (typeof(intersectionId) !== 'undefined' && intersectionId !== null) {
 
-            let isAlreadyIn = this.adjIntersections.some(x => intersectionId === x.id);
+            let isAlreadyIn = this.adjIntersections.some(x => intersectionId === x);
 
             if (isAlreadyIn === false) {
                 this.adjIntersections.push(intersectionId);

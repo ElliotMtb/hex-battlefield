@@ -47,6 +47,11 @@ class SpacialData {
         return false;
     }
 
+    getXyatArcEnd = function(c1,c2,radius,angle) {
+        
+        return [c1+Math.cos(angle)*radius,c2+Math.sin(angle)*radius];
+    };
+
     distance(fromX, fromY, toX, toY) {
         
         var aSqr = Math.pow(fromX - toX, 2);
@@ -57,10 +62,10 @@ class SpacialData {
         return c;
     }
 
-    getIntersectionByXy(x,y) {
+    lookupByXy(x, y, lookupList) {
 
         // Find any colliding vertices
-        var collisions = this.intersections.filter(inter => this.isCollision(inter.x, inter.y, x, y));
+        var collisions = lookupList.filter(point => this.isCollision(point.x, point.y, x, y));
 
         if (collisions.length > 1) {
             throw "ERROR: Single point should never collide with more than 1 vertex.";
@@ -75,6 +80,14 @@ class SpacialData {
         else {
             return collisions[0];
         }
+    }
+
+    getCenterPointByXy(x, y) {
+        return this.lookupByXy(x, y, this.centerPoints);
+    }
+
+    getIntersectionByXy(x, y) {
+        return this.lookupByXy(x, y, this.intersections);
     }
 }
 
