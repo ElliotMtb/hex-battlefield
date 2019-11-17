@@ -6,6 +6,7 @@ import IntersectBuilder from './IntersectionBuilder.js';
 import Foundation from './Foundation.js';
 import HexFactory from './HexFactory.js';
 import SpacialData from './SpacialData.js';
+import GameBoardController from './GameBoardController';
 
 // React Component lifecycle methods are only available with "Component" syntaac (not function syntax)
 class App extends React.Component {
@@ -34,8 +35,11 @@ class App extends React.Component {
       
       let intersectBuilder = new IntersectBuilder(this.state.hexFactory, this.state.spacialData, this.state.foundation.layer);
       let builder = new BoardBuilder(this.state.hexFactory, this.state.spacialData, intersectBuilder);
-
+      
       builder.build(this.state.foundation.layer);
+      
+      let controller = new GameBoardController(this.state.spacialData, this.state.foundation.layer, window.Kinetic);
+      controller.bindEmAll();
     }
 
     render() {
