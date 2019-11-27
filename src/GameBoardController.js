@@ -123,6 +123,13 @@ class GameBoardController {
 
         this.deHighlightNeighbors(cp);
     };
+
+    placeUnit(unit, cp) {
+     
+        this.spacialData.setOccupyingPiece(cp.id, unit);
+        this.kineticLayer.add(unit.image);
+        this.kineticLayer.draw();
+    }
 }
 
 export default GameBoardController;

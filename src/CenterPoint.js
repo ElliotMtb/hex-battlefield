@@ -5,8 +5,12 @@ class CenterPoint {
         this.adjIntersections = [];
         this.adjCenters = [];
         this.hex = null;
+        this.piece = null;
     }
 
+    get occupyingPiece() { return this.piece }
+    set occupyingPiece(piece) { this.piece = piece }
+    
     get uiElem() { return this.hex; }
 
     set uiElem(kineticHex) { this.hex = kineticHex; }

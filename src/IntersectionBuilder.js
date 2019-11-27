@@ -44,13 +44,11 @@ class IntersectionBuilder {
             // Collision
             if (existing) {
                 current = existing;
-                console.log("Collision!");
                 sweepStepper.onCollision(existing, centerPoint);
             }
             // No Collision
             else {
 
-                console.log("No Collision!");
                 let newInter = sweepStepper.onNoCollision(sweepCoords[0], sweepCoords[1]);
                 
                 current = newInter;

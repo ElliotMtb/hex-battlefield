@@ -9,15 +9,14 @@ class BoardBuilder {
         this.intersectionBuilder = intersectionBuilder;
     }
 
-    build (kineticLayer) {
+    buildTabular(kineticLayer, options) {
 
-        let startx = 75;
-        let initialY = 75;
-
+        let { rowCount, colCount, initialX: startx, initialY } = options;
+        
         let r = this.hexFactory.hexRadius;
 
         // Array(10).fill.map(..) is a trick to get a range
-        Array(10).fill().map((_, i) => {
+        Array(rowCount).fill().map((_, i) => {
 
             let starty = initialY + i * (r + (1/2 * r));
             
@@ -28,7 +27,7 @@ class BoardBuilder {
                 startx = startx + r/2 * Math.sqrt(3);
             }
 
-            Array(10).fill().map((_, j) => {
+            Array(colCount).fill().map((_, j) => {
 
                 let x = startx  +  j * r * Math.sqrt(3);
                 let hex = this.hexFactory.getNewHex(x, starty, 'green');

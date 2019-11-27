@@ -10,6 +10,11 @@ class SpacialData {
         this.idGen = new IdGenerator();
     }
 
+    setOccupyingPiece(centerPointId, piece) {
+        let cp = this.centerPoints[centerPointId];
+        cp.occupyingPiece = piece;
+    }
+    
     addCenterPoint(kineticHex) {
 
         let cp = new CenterPoint(this.idGen.nextCenterPointId());
