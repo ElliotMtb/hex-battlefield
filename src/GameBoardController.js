@@ -61,6 +61,7 @@ class GameBoardController {
             if (this.selectedHex !== '')
             {
                 this.deselectHex(this.selectedHex);
+                this.deselectAllHexes();
                 this.toggleSelectedHex(cp);
             }
             else
@@ -122,12 +123,17 @@ class GameBoardController {
         }
     }
 
+    deselectAllHexes() {
+
+        this.spacialData.centerPoints.map(cp => this.deselectHex(cp));
+    }
+
     deselectHex(cp) {
 
         cp.hex.setStroke("black");
         cp.hex.setStrokeWidth("1");
         cp.hex.setAttr('selected', false);
-
+        cp.hex.setFill('green');
         this.deHighlightNeighbors(cp);
     };
 
@@ -138,13 +144,14 @@ class GameBoardController {
         this.kineticLayer.draw();
     }
 
+    
     onHexSelect(cp) {
 
         if (cp.occupyingPiece !== null) {
 
             let occupyingPiece = cp.occupyingPiece;
             
-            // Show range of movement
+            // Show range of movements
             if (occupyingPiece.type === 'tank') {
                 let inRange = [];
                 this.getNeighborsInRange(cp, 0, 3, inRange);
