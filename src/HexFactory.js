@@ -16,11 +16,7 @@ class HexFactory {
         y: y - 50*scale,
         width: 110*scale,
         height: 75*scale,
-        //fill: color,
         fillPatternOffset: [0, 0],
-        hexType: 'grass',
-        hexNumber: 0,
-        //stroke: 'black',
         strokeWidth: 0,
         opacity: 0.75,
         listening: false
