@@ -1,15 +1,13 @@
 
 class HexFactory {
 
-    constructor (kinetic, img) {
+    constructor(kinetic, img) {
       this.Kinetic = kinetic;
       this.hexRadius = 55;
-      this.tank_image = img;
+      this.tankImage = img;
     }
 
-    getTank (x, y) {
-
-      let scale = this.hexRadius/120;
+    getTank(x, y, scale) {
       
       let rect = new this.Kinetic.Rect({
         x: x - 50*scale,
@@ -22,7 +20,7 @@ class HexFactory {
         listening: false
       });
       
-      rect.setFillPatternImage(this.tank_image);
+      rect.setFillPatternImage(this.tankImage);
 
       rect.setFillPatternScale(.5 * scale);
 

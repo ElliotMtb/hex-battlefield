@@ -9,6 +9,56 @@ class GameBoardController {
 
     bindEmAll() {
         this.bindAllHexClicks(this.bindOn);
+        document.onkeydown = (e) => {
+            
+            let allNeighbors = this.spacialData.centerPoints.filter(x => this.selectedHex.adjCenters.some(y => y === x.id));
+            let movingTo;
+
+            // left
+            if (e.keyCode === 37) {
+                movingTo = allNeighbors.find(
+                    cp =>
+                        cp.x < this.selectedHex.x &&
+                        cp.y === this.selectedHex.y
+                    );
+            }
+            // up
+            else if (e.keyCode === 38) {
+                movingTo = allNeighbors.find(
+                    cp =>
+                        cp.x > this.selectedHex.x &&
+                        cp.y < this.selectedHex.y
+                    );
+            }
+            // right
+            else if (e.keyCode === 39) {
+                movingTo = allNeighbors.find(
+                    cp =>
+                        cp.x > this.selectedHex.x &&
+                        cp.y === this.selectedHex.y
+                    );
+            }
+            // down
+            else if (e.keyCode === 40) {
+                movingTo = allNeighbors.find(
+                    cp =>
+                        cp.x < this.selectedHex.x &&
+                        cp.y > this.selectedHex.y
+                    );
+                
+            }
+
+            if (typeof(movingTo) !== 'undefined') {
+
+                let thePiece = this.selectedHex.occupyingPiece;
+                this.selectedHex.occupyingPiece = null;
+    
+                this.spacialData.setOccupyingPiece(movingTo.id, thePiece);
+                this.selectHex(movingTo);
+                thePiece.moveTo(movingTo.hex.getAttr('x'), movingTo.hex.getAttr('y'));
+                this.kineticLayer.draw();
+            }
+        }
     }
 
     bindAllHexClicks(binder) {

@@ -7,8 +7,9 @@ class PiecesFactory {
     }
 
     getTank(playerId, x, y) {
-        let tank = this.kineticFactory.getTank(x, y);
-        let piece = new GamePiece('tank', 1, tank);
+        let scale = this.kineticFactory.hexRadius/120;
+        let tank = this.kineticFactory.getTank(x, y, scale);
+        let piece = new GamePiece('tank', 1, tank, scale);
 
         return piece;
     }
