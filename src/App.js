@@ -17,7 +17,7 @@ class App extends React.Component {
       // I added Kinetic as a <script> in index.html and so it got added to the window scope.
       // Passing it in here
       this.state = {
-        spacialData: new SpacialData(),
+        spacialData: new SpacialData(1400, 1200),
         hexFactory: null,
         piecesFactory: null,
         foundation: null
@@ -41,9 +41,14 @@ class App extends React.Component {
         console.log('Tank image loaded!');
         // It seems Kinetic isn't fully ready in constructor of the App component,
         // so waiting until here to set the Stage and Layer
-        this.state.hexFactory = new HexFactory(window.Kinetic, img);
-        this.state.piecesFactory = new PiecesFactory(this.state.hexFactory);
-        this.state.foundation = new Foundation(window.Kinetic);
+        this.setState(
+          {
+            hexFactory: new HexFactory(window.Kinetic, img),
+            foundation: new Foundation(window.Kinetic)
+          }
+        );
+
+        this.setState({ piecesFactory: new PiecesFactory(this.state.hexFactory) });
         
         let intersectBuilder = new IntersectBuilder(this.state.hexFactory, this.state.spacialData, this.state.foundation.layer);
         let builder = new BoardBuilder(this.state.hexFactory, this.state.spacialData, intersectBuilder);
@@ -71,7 +76,7 @@ class App extends React.Component {
     render() {
       return (
         <div className="App">
-          <div style={{width: '550px', display: 'none'}} id="gameBoardContainer" height="1200" width="1400">
+          <div style={{width: '550px', display: 'none'}} id="gameBoardContainer" height={this.state.spacialData.boardHeight} width={this.state.spacialData.boardWidth}>
           </div>
         </div>
       );
