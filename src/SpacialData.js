@@ -94,6 +94,24 @@ class SpacialData {
     getIntersectionByXy(x, y) {
         return this.lookupByXy(x, y, this.intersections);
     }
+
+    getNeighborsInRange(cp, depthCounter, endDepth, neighborsInRange) {
+        
+        if (depthCounter === endDepth) {
+            return;
+        }
+        
+        for (var nid in cp.adjCenters) {
+            let id = cp.adjCenters[nid];
+            let neighbor = this.centerPoints[id];
+            
+            if (neighborsInRange.indexOf(id) === -1) {
+                neighborsInRange.push(neighbor);
+            }
+
+            this.getNeighborsInRange(neighbor, depthCounter + 1, endDepth, neighborsInRange);
+        }
+    }
 }
 
 export default SpacialData;

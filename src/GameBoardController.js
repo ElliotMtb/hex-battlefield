@@ -147,24 +147,6 @@ class GameBoardController {
         cp.hex.draw();
     }
     
-    getNeighborsInRange(cp, depthCounter, endDepth, neighborsInRange) {
-        
-        if (depthCounter === endDepth) {
-            return;
-        }
-        
-        for (var nid in cp.adjCenters) {
-            let id = cp.adjCenters[nid];
-            let neighbor = this.spacialData.centerPoints[id];
-            
-            if (neighborsInRange.indexOf(id) === -1) {
-                neighborsInRange.push(neighbor);
-            }
-
-            this.getNeighborsInRange(neighbor, depthCounter + 1, endDepth, neighborsInRange);
-        }
-    }
-
     deHighlightNeighbors(cp) {
 
         console.log(cp.adjCenters);
@@ -207,7 +189,7 @@ class GameBoardController {
             // Show range of movements
             if (occupyingPiece.type === 'tank') {
                 let inRange = [];
-                this.getNeighborsInRange(cp, 0, 3, inRange);
+                this.spacialData.getNeighborsInRange(cp, 0, 3, inRange);
 
                 inRange.map(x => x.hex.setFill('limegreen'));
             }
