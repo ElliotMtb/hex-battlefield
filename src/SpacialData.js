@@ -4,10 +4,12 @@ import IdGenerator from './IdGenerator.js';
 
 class SpacialData {
 
-    constructor () {
+    constructor (boardWidth, boardHeight) {
         this.centerPoints = [];
         this.intersections = [];
         this.idGen = new IdGenerator();
+        this.boardWidth = boardWidth;
+        this.boardHeight = boardHeight;
     }
 
     setOccupyingPiece(centerPointId, piece) {
@@ -53,8 +55,9 @@ class SpacialData {
     }
 
     getXyatArcEnd = function(c1,c2,radius,angle) {
-        
-        return [c1+Math.cos(angle)*radius,c2+Math.sin(angle)*radius];
+        let x = c1+Math.cos(angle)*radius;
+        let y = c2+Math.sin(angle)*radius;
+        return [x,y];
     };
 
     distance(fromX, fromY, toX, toY) {
@@ -111,6 +114,72 @@ class SpacialData {
 
             this.getNeighborsInRange(neighbor, depthCounter + 1, endDepth, neighborsInRange);
         }
+    }
+
+    /*
+        Return hexes that are in line of sight
+    */
+    getLineOfSight(centerPoint, sector) {
+        
+    }
+
+    getVertexAngle(centerX, centerY, radialIndex) {
+
+        // -60 degree increment (negative is for counter-clockwise direction)
+        var angleIncrement = -2 * Math.PI / 6;
+        
+        // -30 degree offset (negative is for counter-clockwise direction)
+        var angleOffset = -2 * Math.PI / 12;
+
+        var angleToVertex = radialIndex * angleIncrement - angleOffset;
+
+        return angleToVertex;
+    }
+
+    adjustYForInfinity(slope, x, y, defaultX) {
+
+        let adjustedY = y;
+        let adjustedX = x;
+
+        if (slope === Number.NEGATIVE_INFINITY) {
+            adjustedY = 0;
+            adjustedX = defaultX;
+        }
+        else if (slope === Number.POSITIVE_INFINITY) {
+            adjustedY = this.boardHeight;
+            adjustedX = defaultX;
+        }
+
+        return [adjustedX, adjustedY];
+    }
+
+    getLineData(angleToVector, originX, originY) {
+        
+        let formula = {};
+
+        // If angle = 90deg or 270, slope will be huge (near infinite)
+        //let slope = Math.tan(angleToVertex);
+
+        let [arcEndX, arcEndY] = this.getXyatArcEnd(originX, originY, 200, angleToVector);
+
+        // Rounding to 10 places behind the decimal (to more easily cause Infinity/-Infinity via divided by zero)
+        let arcEndXRound = Math.round(arcEndX * 10000000000)/10000000000;
+        let originXRound = Math.round(originX * 10000000000)/10000000000;
+
+        let slope = (arcEndY - originY) / (arcEndXRound - originXRound);
+
+        formula['yInter'] = originY - slope * originX;
+        formula['slope'] = slope;
+
+        return formula;
+    }
+
+    calcY(x, lineCofficients) {
+        return lineCofficients['slope'] * x + lineCofficients['yInter'];
+    }
+
+    calcLineYs(x1, x2, coefficients) {
+        return [this.calcY(x1, coefficients), this.calcY(x2, coefficients)];
     }
 }
 
