@@ -49,7 +49,8 @@ class RadialSweepVertex {
             currentIntersect.addNeighborIntersection(previousIntersect.id);
         }
 
-        currentIntersect.addNeighborCenterPoint(centerPoint)
+        currentIntersect.addNeighborCenterPoint(centerPoint.id);
+        centerPoint.addNeighborIntersection(currentIntersect.id);
     }
 }
 

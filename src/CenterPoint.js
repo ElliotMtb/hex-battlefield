@@ -29,6 +29,18 @@ class CenterPoint {
             }
         }
     }
+
+    addNeighborIntersection(intersectionId) {
+
+        if (typeof(intersectionId) !== 'undefined' && intersectionId !== null) {
+
+            let isAlreadyIn = this.adjIntersections.some(x => intersectionId === x);
+
+            if (isAlreadyIn === false) {
+                this.adjIntersections.push(intersectionId);
+            }
+        }
+    }
 }
 
 export default CenterPoint;

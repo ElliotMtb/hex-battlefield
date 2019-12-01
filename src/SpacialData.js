@@ -153,20 +153,54 @@ class SpacialData {
         return [adjustedX, adjustedY];
     }
 
-    getLineData(angleToVector, originX, originY) {
+    getIntersect(lineData1, lineData2) {
+
+        // f1(x) = m1 * x1 + b1
+        // f2(x) = m2 * x2 + b2
+        
+        // Intersect where equal:
+        // m1 * x + b1 = m2 * x + b2
+        // (m1 * x) - (m2 * x) = b2 - b1
+        // x * (m1 - m2) = b2 - b1
+        // x = (b2 - b1) / (m1 - m2)
+
+        let { slope: m1, yInter: b1 } = lineData1;
+        let { slope: m2, yInter: b2 } = lineData2;
+
+        let formula = {};
+
+        let x = (b2 - b1) / (m1 - m2);
+        // Then plug back in to see y
+        let y = this.calcY(x, lineData1);
+
+        return [x,y]
+    }
+
+    getPerpendicular(pointX, pointY, lineData) {
+
+        let formula = {};
+
+        let newSlope = -1/lineData['slope'];
+
+        let yInter;
+        // Solve for new y-intercept
+        yInter = pointY - newSlope * pointX;
+
+        formula['slope'] = newSlope;
+        formula['yInter'] = yInter;
+
+        return formula;
+    }
+    
+    getLineData(pointX, pointY, originX, originY) {
         
         let formula = {};
 
-        // If angle = 90deg or 270, slope will be huge (near infinite)
-        //let slope = Math.tan(angleToVertex);
-
-        let [arcEndX, arcEndY] = this.getXyatArcEnd(originX, originY, 200, angleToVector);
-
         // Rounding to 10 places behind the decimal (to more easily cause Infinity/-Infinity via divided by zero)
-        let arcEndXRound = Math.round(arcEndX * 10000000000)/10000000000;
+        let arcEndXRound = Math.round(pointX * 10000000000)/10000000000;
         let originXRound = Math.round(originX * 10000000000)/10000000000;
 
-        let slope = (arcEndY - originY) / (arcEndXRound - originXRound);
+        let slope = (pointY - originY) / (arcEndXRound - originXRound);
 
         formula['yInter'] = originY - slope * originX;
         formula['slope'] = slope;

@@ -1,10 +1,35 @@
+import LineOfSightTargetter from './LineOfSightTargetter.js';
+
 class GameBoardController {
 
-    constructor(spacialData, kineticLayer, Kinetic) {
-        this.spacialData = spacialData;
-        this.kineticLayer = kineticLayer;
-        this.selectedHex = '';
+    constructor(spacialData, kineticLayer, Kinetic, lineOfSightTargetter) {
         this.Kinetic = Kinetic;
+        this.kineticLayer = kineticLayer;
+        this.spacialData = spacialData;
+
+        this.lineOfSightTargetter = lineOfSightTargetter;
+        kineticLayer.add(this.lineOfSightTargetter.blockerCenterLine);
+        kineticLayer.add(this.lineOfSightTargetter.leftEdgeBlocker);
+        kineticLayer.add(this.lineOfSightTargetter.rightEdgeBlocker);
+        lineOfSightTargetter.orthogLines.map(o => kineticLayer.add(o));
+
+        this.faceTrailingEdge = new this.Kinetic.Line(
+            {
+                points: [0,0,0,0],
+                stroke: 'red'
+            }
+        );
+
+        this.faceLeadingEdge = new this.Kinetic.Line(
+            {
+                points: [0,0,0,0],
+                stroke: 'blue'
+            }
+        );
+        this.kineticLayer.add(this.faceLeadingEdge);
+        this.kineticLayer.add(this.faceTrailingEdge);
+
+        this.selectedHex = '';
     }
 
     bindEmAll() {
@@ -195,7 +220,11 @@ class GameBoardController {
             }
         }
 
-        this.drawLineOfSightInSector(cp, 4);
+        // direction
+        let dirSector = 5;
+        if (this.selectedHex.occupyingPiece.facingDir ==='right') { dirSector = 2 }
+
+        this.drawLineOfSightInSector(cp, dirSector);
     }
 
     drawLineOfSightInSector(cp, sector) {
@@ -238,10 +267,12 @@ class GameBoardController {
         let vector2 = sector;
 
         let angleToVector1 = this.spacialData.getVertexAngle(cp.x, cp.y, vector1);
-        let angleToVector2 = this.spacialData.getVertexAngle(cp.x, cp.y, vector2);
+        let [arcEndX1, arcEndY1] = this.spacialData.getXyatArcEnd(cp.x, cp.y, 200, angleToVector1);
+        let v0 = this.spacialData.getLineData(arcEndX1, arcEndY1, cp.x, cp.y);
 
-        let v0 = this.spacialData.getLineData(angleToVector1, cp.x, cp.y);
-        let v1 = this.spacialData.getLineData(angleToVector2, cp.x, cp.y);
+        let angleToVector2 = this.spacialData.getVertexAngle(cp.x, cp.y, vector2);
+        let [arcEndX2, arcEndY2] = this.spacialData.getXyatArcEnd(cp.x, cp.y, 200, angleToVector2);
+        let v1 = this.spacialData.getLineData(arcEndX2, arcEndY2,cp.x, cp.y);
 
         // Draw line from f(cp.x) to f(xMax)
 
@@ -265,22 +296,134 @@ class GameBoardController {
         let yTarget = fOfMax0;
         let y2Target = fOfMax1;
 
-        let line0 = new this.Kinetic.Line(
-            {
-                points: [cp.x, cp.y, xTarget, yTarget],
-                stroke: 'red'
-            }
-        );
+        this.faceTrailingEdge.setPoints([cp.x, cp.y, xTarget, yTarget]);
 
-        let line1 = new this.Kinetic.Line(
-            {
-                points: [cp.x, cp.y, x2Target, y2Target],
-                stroke: 'blue'
-            }
-        );
+        this.faceLeadingEdge.setPoints([cp.x, cp.y, x2Target, y2Target]);
 
-        this.kineticLayer.add(line0);
-        this.kineticLayer.add(line1);
+        // let blocker = this.spacialData.centerPoints[44];
+        let blocker = this.spacialData.centerPoints[110];
+        blocker.hex.setStroke('red');
+        blocker.hex.setFill('red');
+        blocker.hex.setStrokeWidth(3);
+        this.kineticLayer.draw();
+
+        // Find centerline from selected centerPoint through blocker-centerPoint
+        let centerLineFunc = this.spacialData.getLineData(blocker.x, blocker.y, cp.x, cp.y);
+        let centerLineEndX = blocker.x + 150;
+        if (blocker.x < cp.x) { centerLineEndX = blocker.x -150; }
+
+        let centerLineEndY = this.spacialData.calcY(centerLineEndX, centerLineFunc);
+
+        this.lineOfSightTargetter.target(blocker);
+
+        this.lineOfSightTargetter.blockerCenterLine.setPoints([cp.x, cp.y, centerLineEndX, centerLineEndY]);
+
+        let compareRight = (vertexY, fOfVertexX) => { return vertexY < fOfVertexX };
+        let compareLeft = (vertexY, fOfVertexX) => { return vertexY > fOfVertexX };
+
+        let findVertsToSideOfCenterLine = (blocker, centerLineFunc, compareFunc) => {
+
+            // Get vertices where vert.y > f(vert.x)
+            let setOfVerts = blocker.adjIntersections.filter(interId => {
+    
+                let theVert = this.spacialData.intersections[interId];
+                // f(vert.x)
+                let fOfVertX = this.spacialData.calcY(theVert.x, centerLineFunc);
+    
+                return compareFunc(theVert.y, fOfVertX);
+            });
+
+            return setOfVerts;
+        }
+
+        let rightOfTheLine = findVertsToSideOfCenterLine(blocker, centerLineFunc, compareRight);
+        let leftOfTheLine = findVertsToSideOfCenterLine(blocker, centerLineFunc, compareLeft);
+
+        rightOfTheLine.map(x => this.spacialData.intersections[x].vertex.show());
+        leftOfTheLine.map(x => this.spacialData.intersections[x].vertex.show());
+
+        let rightOfTheLineInts = rightOfTheLine.map(x => this.spacialData.intersections[x]);
+        let leftOfTheLineInts = leftOfTheLine.map(x => this.spacialData.intersections[x]);
+
+        let drawSideEdge = (sideVertexSet, edgeBlockerLine, sideVertColor, blockerVertOrthogLines) => {
+
+            let orthogonals = sideVertexSet.map(inter => {
+                return {
+                    'formula': this.spacialData.getPerpendicular(inter.x, inter.y, centerLineFunc),
+                    'intersection': inter
+                };
+            });
+    
+            orthogonals.map((vertForm, i) => {
+    
+                let [orthInterCentX, orthInterCentY] = this.spacialData.getIntersect(centerLineFunc, vertForm['formula']);
+    
+                let currentVert = vertForm['intersection'];
+    
+                let orthLine = blockerVertOrthogLines[currentVert.id];
+                orthLine.setPoints([orthInterCentX, orthInterCentY, currentVert.x, currentVert.y]);
+            });
+    
+            let longestOrth = orthogonals.reduce((a, b, index) => {
+    
+                let [interAx, interAy] = this.spacialData.getIntersect(centerLineFunc, a['formula']);
+                let [interBx, interBy] = this.spacialData.getIntersect(centerLineFunc, b['formula']);
+    
+                let currentVertA = a['intersection'];
+                let currentVertB = b['intersection'];
+    
+                let distA = this.spacialData.distance(interAx, interAy, currentVertA.x, currentVertA.y);
+                let distB = this.spacialData.distance(interBx, interBy, currentVertB.x, currentVertB.y);
+    
+                let longest = a;
+    
+                if (distB > distA)
+                    longest = b
+    
+                return longest;
+            });
+    
+            let leftMostVertex = longestOrth['intersection'];
+    
+            leftMostVertex.vertex.setStroke(sideVertColor);
+            leftMostVertex.vertex.setStrokeWidth('3');        
+            leftMostVertex.vertex.moveToTop();
+    
+            let edgeFormula = this.spacialData.getLineData(leftMostVertex.x, leftMostVertex.y, cp.x, cp.y);
+
+            // Let's project out to the edge of the game board
+            let edgeEndX = this.spacialData.boardWidth;
+            if (leftMostVertex.x < cp.x) { edgeEndX = 0 }
+
+            let edgeEndY = this.spacialData.calcY(edgeEndX, edgeFormula);
+
+            edgeBlockerLine.setPoints([cp.x, cp.y, edgeEndX, edgeEndY]);
+            
+            return edgeFormula;
+        };
+
+        let rightEdge = this.lineOfSightTargetter.rightEdgeBlocker;
+        let leftEdge = this.lineOfSightTargetter.leftEdgeBlocker;
+
+        let rightEdgeFormula = drawSideEdge(rightOfTheLineInts, rightEdge, rightEdge.getAttr('stroke'), this.lineOfSightTargetter.blockerVertOrthogLines);
+        let leftEdgeFormula = drawSideEdge(leftOfTheLineInts, leftEdge, leftEdge.getAttr('stroke'), this.lineOfSightTargetter.blockerVertOrthogLines);
+
+        this.spacialData.centerPoints.map(candidate => {
+
+            let fOfRight = this.spacialData.calcY(candidate.x, rightEdgeFormula);
+            let fOfLeft = this.spacialData.calcY(candidate.x, leftEdgeFormula);
+
+            let distToCand = this.spacialData.distance(candidate.x, candidate.y, cp.x, cp.y);
+            let distToBlocker = this.spacialData.distance(cp.x, cp.y, blocker.x, blocker.y);
+
+            if (Math.abs(distToCand) > Math.abs(distToBlocker) && candidate.id !== cp.id) {
+
+                if (fOfRight < candidate.y && fOfLeft > candidate.y) {
+                    candidate.hex.setFill('black');
+                }
+            }
+        });
+
         this.kineticLayer.draw();
     }
 }

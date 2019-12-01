@@ -8,6 +8,7 @@ import PiecesFactory from './PiecesFactory.js';
 import HexFactory from './HexFactory.js';
 import SpacialData from './SpacialData.js';
 import GameBoardController from './GameBoardController';
+import LineOfSightTargetter from './LineOfSightTargetter';
 
 // React Component lifecycle methods are only available with "Component" syntaac (not function syntax)
 class App extends React.Component {
@@ -56,14 +57,22 @@ class App extends React.Component {
         builder.buildTabular(
           this.state.foundation.layer,
           {
-            rowCount: 10,
-            colCount: 10,
+            rowCount: 20,
+            colCount: 20,
             initialX: 75,
             initialY: 75
           }
         );
         
-        let controller = new GameBoardController(this.state.spacialData, this.state.foundation.layer, window.Kinetic);
+        let losTargetter = new LineOfSightTargetter(window.Kinetic, this.state.foundation.layer, this.state.hexFactory);
+
+        let controller = new GameBoardController(
+          this.state.spacialData,
+          this.state.foundation.layer,
+          window.Kinetic,
+          losTargetter
+          );
+          
         controller.bindEmAll();
 
         // Game setup begins

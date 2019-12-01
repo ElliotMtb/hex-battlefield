@@ -3,8 +3,24 @@ class HexFactory {
 
     constructor(kinetic, img) {
       this.Kinetic = kinetic;
-      this.hexRadius = 55;
+      this.hexRadius = 35;
       this.tankImage = img;
+
+      
+      this.leftEdgeBlocker = this.initBlockerLine('fuchsia');
+      this.rightEdgeBlocker = this.initBlockerLine('lawngreen');
+      this.blockerCenterLine = this.initBlockerLine('black');
+    }
+
+    initBlockerLine(color) {
+        let edgeLine = new this.Kinetic.Line(
+            {
+                points: [0,0,0,0],
+                stroke: color,
+                setStrokeWidth: 3
+            }
+        );
+        return edgeLine;
     }
 
     getTank(x, y, scale) {

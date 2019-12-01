@@ -26,8 +26,16 @@ class Intersection {
         }
     }
 
-    addNeighborCenterPoint() {
+    addNeighborCenterPoint(centerPointId) {
 
+        if (typeof(centerPointId) !== 'undefined' && centerPointId !== null) {
+
+            let isAlreadyIn = this.adjCenters.some(x => centerPointId === x);
+
+            if (isAlreadyIn === false) {
+                this.adjCenters.push(centerPointId);
+            }
+        }
     }
 }
 
