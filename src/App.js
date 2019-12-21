@@ -18,7 +18,7 @@ class App extends React.Component {
       // I added Kinetic as a <script> in index.html and so it got added to the window scope.
       // Passing it in here
       this.state = {
-        spacialData: new SpacialData(1400, 1200),
+        spacialData: new SpacialData(1200, 750),
         hexFactory: null,
         piecesFactory: null,
         foundation: null
@@ -79,13 +79,20 @@ class App extends React.Component {
         let targetHex = this.state.spacialData.centerPoints[12];
         let player1Tank = this.state.piecesFactory.getTank(1, targetHex.x, targetHex.y);
         controller.placeUnit(player1Tank, targetHex);
+
+        let gbc = document.getElementById('gameBoardContainer');
+        gbc.style.overflow = 'scroll';
+        gbc.style.overflowY = 'scroll';
+        gbc.style.overflowY = 'scroll';
+        gbc.style.height = '90vh'; // 90% of viewport height
+        gbc.style.width = '90vw';  // 90% of viewport width
       };
     }
 
     render() {
       return (
         <div className="App">
-          <div style={{width: '550px', display: 'none'}} id="gameBoardContainer" height={this.state.spacialData.boardHeight} width={this.state.spacialData.boardWidth}>
+          <div style={{width: '1200px', display: 'none'}} id="gameBoardContainer" height={this.state.spacialData.boardHeight} width={this.state.spacialData.boardWidth}>
           </div>
         </div>
       );
