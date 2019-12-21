@@ -9,6 +9,7 @@ import HexFactory from './HexFactory.js';
 import SpacialData from './SpacialData.js';
 import GameBoardController from './GameBoardController';
 import LineOfSightTargetter from './LineOfSightTargetter';
+import './Game.css';
 
 // React Component lifecycle methods are only available with "Component" syntaac (not function syntax)
 class App extends React.Component {
@@ -79,20 +80,13 @@ class App extends React.Component {
         let targetHex = this.state.spacialData.centerPoints[12];
         let player1Tank = this.state.piecesFactory.getTank(1, targetHex.x, targetHex.y);
         controller.placeUnit(player1Tank, targetHex);
-
-        let gbc = document.getElementById('gameBoardContainer');
-        gbc.style.overflow = 'scroll';
-        gbc.style.overflowY = 'scroll';
-        gbc.style.overflowY = 'scroll';
-        gbc.style.height = '90vh'; // 90% of viewport height
-        gbc.style.width = '90vw';  // 90% of viewport width
       };
     }
 
     render() {
       return (
         <div className="App">
-          <div style={{width: '1200px', display: 'none'}} id="gameBoardContainer" height={this.state.spacialData.boardHeight} width={this.state.spacialData.boardWidth}>
+          <div style={{display: 'none'}} id="gameBoardContainer">
           </div>
         </div>
       );
