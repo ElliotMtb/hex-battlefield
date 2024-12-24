@@ -21,3 +21,6 @@ The gameboard can be dynamically drawn at different sizes (varying number of row
 The math and logic is in place to be able calculate spaces that are blocked from line of site for 1 game piece facing in either the up direction, with respect to a fixed line-of-site blocking hexagon (as depicted in the preview below):
 
 <img src="https://user-images.githubusercontent.com/2363880/122866368-0e0cdd80-d2e5-11eb-81e5-3b302e2a58b9.gif" height="400" />
+
+## Notes
+Confirmed to work on Linux ubuntu Microsoft Edge and Firefox, using node 22, with react 18 (as of Dec. 2024)
